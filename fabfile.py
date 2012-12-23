@@ -24,11 +24,16 @@ def _check_sudo():
             print "Trying to install sudo. Must be root"
             run('apt-get update && apt-get install -y sudo')  
 
-def monit_install():
+def monit_install(force=False):
     """
     Installs monit 5.5
     """
     _check_sudo()
+    result = sudo('monit -V')
+    if result.succeeded and "Monit version 5.5" in result and not force:
+        print "Monit 5.5 already installed. Skipping."
+        print "(use force=True to force install)"
+        return
     sudo('apt-get update && apt-get upgrade -y')
     sudo('apt-get install -y build-essential libpam-dev libssl-dev make')
     sudo('mkdir -p /usr/local/src')
