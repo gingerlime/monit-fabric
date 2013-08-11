@@ -55,5 +55,7 @@ def monit_install(force=False):
     put('config/monitrc', '/etc/monit', use_sudo=True)
     put('config/monitrc', '/etc/monit', use_sudo=True)
     sudo('chmod 600 /etc/monit/monitrc')
+    sudo('chown root /etc/monit/monitrc')
     sudo('chmod ugo+x /etc/init.d/monit')
     sudo('cd /etc/init.d && update-rc.d monit defaults')
+    sudo('/etc/init.d/monit start')
