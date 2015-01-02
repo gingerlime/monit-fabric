@@ -42,7 +42,12 @@ def monit_install(force=False):
         sudo('wget -N http://mmonit.com/monit/dist/monit-5.5.tar.gz')
         sudo('tar -zxvf monit-5.5.tar.gz')
     with cd('/usr/local/src/monit-5.5'):
-        sudo('./configure --sysconfdir=/etc/monit')
+        with settings(warn_only=True):
+            result = sudo('./configure --sysconfdir=/etc/monit')
+            if result.failed:
+                # a workaround for ubuntu 12.04 (see
+                # http://thinkinginsoftware.blogspot.de/2012/09/today-we-got-weird-error-in-one-of.html)
+                sudo('./configure --sysconfdir=/etc/monit --with-ssl-lib-dir=/usr/lib/`uname -i`-linux-gnu')
         sudo('make && make install')
     sudo('mkdir -p /etc/monit')
     sudo('mkdir -p /var/lib/monit')
@@ -50,5 +55,7 @@ def monit_install(force=False):
     put('config/monitrc', '/etc/monit', use_sudo=True)
     put('config/monitrc', '/etc/monit', use_sudo=True)
     sudo('chmod 600 /etc/monit/monitrc')
+    sudo('chown root /etc/monit/monitrc')
     sudo('chmod ugo+x /etc/init.d/monit')
     sudo('cd /etc/init.d && update-rc.d monit defaults')
+    sudo('/etc/init.d/monit start')
